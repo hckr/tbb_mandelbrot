@@ -1,17 +1,11 @@
-#include <iostream>
-#include <png++/png.hpp>
-#include <tbb/parallel_invoke.h>
+#include "mandelbrot.hpp"
+#include <cmath>
 
 int main() {
-    tbb::parallel_invoke([]() { std::cout << "test1 "; }, []() { std::cout << "test2\n"; });
+    auto image = mandelbrot::image({.width = 512u,
+                                    .height = 512u,
+                                    .top_left = {-2.0, -1.25},
+                                    .bottom_right = {0.5, 1.25}});
 
-    png::image<png::rgb_pixel>
-        image(128, 128);
-    for (png::uint_32 y = 0; y < image.get_height(); ++y) {
-        for (png::uint_32 x = 0; x < image.get_width(); ++x) {
-            image[y][x] = png::rgb_pixel(x, y, x + y);
-            // non-checking equivalent of image.set_pixel(x, y, ...);
-        }
-    }
-    image.write("rgb.png");
+    image.write("mandelbrot.png");
 }
