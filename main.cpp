@@ -1,4 +1,3 @@
-#include "helpers.hpp"
 #include "mandelbrot.hpp"
 #include <cmath>
 #include <iterator>
@@ -34,11 +33,18 @@ int main() {
          .height = 512u,
          .top_left = {-2.0, -1.25},
          .bottom_right = {0.5, 1.25}},
-        {.width = 768,
-         .height = 1024u,
+        {.width = 512u,
+         .height = 512u,
          .top_left = {-0.5, -0.5},
          .bottom_right = {0.5, 0.5}},
-    };
+        {.width = 512u,
+         .height = 512u,
+         .top_left = {0.25, -0.05},
+         .bottom_right = {0.35, 0.05}},
+        {.width = 512u,
+         .height = 512u,
+         .top_left = {-0.80, 0.05},
+         .bottom_right = {-0.70, 0.15}}};
 
     tbb::flow::graph g;
 
@@ -60,20 +66,17 @@ int main() {
 
         pixels_with_args merged = data1;
 
-        const png::uint_32 offsetX = 10;
+        const std::size_t offset = 25;
+        const std::size_t pixels_size = merged.pixels.size();
 
-        for (png::uint_32 y = 0; y < data1.image_args.height; ++y) {
-            for (png::uint_32 x = 0; x < data1.image_args.width; ++x) {
-                if (x + offsetX < data1.image_args.width && y * data1.image_args.height + x + offsetX < data1.pixels.size()) {
-                    merged.pixels[y * data1.image_args.height + x].red = (data1.pixels[y * data1.image_args.height + x].red + data2.pixels[y * data1.image_args.height + x + offsetX].red) / 2;
-                    merged.pixels[y * data1.image_args.height + x].green = (data1.pixels[y * data1.image_args.height + x].green + data2.pixels[y * data1.image_args.height + x + offsetX].green) / 2;
-                    merged.pixels[y * data1.image_args.height + x].blue = (data1.pixels[y * data1.image_args.height + x].blue + data2.pixels[y * data1.image_args.height + x + offsetX].blue) / 2;
-                } else {
-                    merged.pixels[y * data1.image_args.height + x].red = data1.pixels[y * data1.image_args.height + x].red;
-                    merged.pixels[y * data1.image_args.height + x].green = data1.pixels[y * data1.image_args.height + x].green;
-                    merged.pixels[y * data1.image_args.height + x].blue = data1.pixels[y * data1.image_args.height + x].blue;
-                }
-            }
+        for (std::size_t i = 0; i < pixels_size; ++i) {
+            const auto offset_i = (i + offset) % pixels_size;
+            merged.pixels[i].red += data2.pixels[offset_i].red;
+            merged.pixels[i].red /= 2;
+            merged.pixels[i].green += data2.pixels[offset_i].green;
+            merged.pixels[i].green /= 2;
+            merged.pixels[i].blue += data2.pixels[offset_i].blue;
+            merged.pixels[i].blue /= 2;
         }
 
         return std::tuple{data1, data2, merged};
